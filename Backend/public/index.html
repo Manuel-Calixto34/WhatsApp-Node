@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+    window.onload = () => {
+        document.getElementById("btnEnviarNombre").addEventListener("click",enviarNombre)
+        document.getElementById("btnEnviarMensaje").addEventListener("click", enviar);
+
+        socket.on("numeroUsuarios", (numero) => {
+            document.getElementById("conectados").innerHTML =
+                "Hay " + numero + " usuarios conectados";
+        });
+
+        socket.on("mensaje", (datos) => {
+            const mensajes = document.getElementById("mensajes");
+            const p = document.createElement("p");
+
+            p.textContent = datos;
+
+            mensajes.appendChild(p);
+        });
+
+        socket.on("escrito",(escribir) => {
+            document.getElementById("escribiendo").innerHTML = "Escribiendo..."
+        })
+
+        socket.on("nombreUsuario",(nombre) => {
+            console.log(nombre.nombreUsuario + "ha entrado al canal con estado: "+nombre.estado);
+            socket.emit("nombreUsuario",nombre);
+        })
+    };
+
+    function enviar() {
+        var texto = document.getElementById("inputTexto").value;
+
+        console.log("Enviar mensaje: " + texto);
+
+        socket.emit("mensajeTexto", texto);
+
+
+        document.getElementById("inputTexto").value = "";
+    }
+
+    function enviarNombre(){
+        var nombre = document.getElementById("inputNombre").value;
+
+        console.log("Tu nombre es: " + nombre);
+
+        var nombreAEnviar = {
+            nombreUsuario: nombre,
+            estado: "Where is Omniman",
+            imagen: ""
+        };
+
+        socket.emit("nombreUsuario", nombreAEnviar);
+
+        document.getElementById("divMensajes").hidden = false;
+        document.getElementById("divNombre").hidden = true;
+
+        document.getElementById("inputNombre").value = "";
+    }
+    </script>
+</head>
+<body>
+    <div id="divNombre"> Escribe tu nombre
+        <input id="inputNombre" type="text">
+        <button id="btnEnviarNombre">Enviar nombre</button>
+    </div>
+    <div id="divMensajes" hidden="true">
+        <input id="inputTexto" type="text">
+        <button id="btnEnviarMensaje">Enviar mensaje</button>
+    </div>
+
+    <p id="conectados"></p>
+    <div id="mensajes"></div>
+    <p id="escribiendo"></p>
+    <img src="wp14700731-mouthwashing-wallpapers.jpg">
+</body>
+</html>
