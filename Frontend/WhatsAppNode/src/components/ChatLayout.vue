@@ -13,7 +13,13 @@ const usuario = route.query.usuario || 'Anonimo';
 const estado = route.query.estado || '';
 const avatar = route.query.avatar || '/avatars/avatar1.png';
 
-const socket = io('https://whatsapp-node-jrt9.onrender.com');
+const socketServerUrl = import.meta.env.VITE_SOCKET_SERVER_URL || (
+  import.meta.env.DEV
+    ? 'http://localhost:3000'
+    : 'https://whatsapp-node-jrt9.onrender.com'
+);
+
+const socket = io(socketServerUrl);
 
 const numeroUsuarios = ref(0);
 const mensajes = ref([]);

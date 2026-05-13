@@ -3,22 +3,29 @@ const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+const allowedOrigins = (process.env.CORS_ORIGINS || [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://whatsappnode-f49e1.web.app',
+].join(','))
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'https://whatsapp-node-jrt9.onrender.com',
-      'https://whatsappnode-f49e1.web.app'
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(express.static('public'));
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
 
 let count = 0;
 
@@ -52,5 +59,5 @@ io.on('connection', (socket) => {
 
 
 server.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Socket server listening on port ${port}`);
 });
