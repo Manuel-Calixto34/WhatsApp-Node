@@ -35,9 +35,9 @@ defineEmits([
     <header class="chat-header">
       <div class="chat-title">
         <span class="brand-icon">W</span>
-        <div>
+        <div class="chat-heading">
           <h1>WhatsAppNode</h1>
-          <p>{{ chatActivo?.nombre || 'Chat comun' }}</p>
+          <p class="room-name">{{ chatActivo?.nombre || 'Chat comun' }}</p>
           <p v-if="usuarioEscribiendo" class="typing-message">
             {{ usuarioEscribiendo }}
           </p>
@@ -113,6 +113,11 @@ defineEmits([
   gap: 16px;
 }
 
+.chat-heading {
+  display: grid;
+  gap: 4px;
+}
+
 .brand-icon {
   width: 48px;
   height: 48px;
@@ -134,8 +139,7 @@ p {
 
 .typing-message {
   margin: 0;
-  padding: 0 clamp(16px, 4vw, 48px) 10px;
-  color: #5a746b;
+  color: #128c7e;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -145,7 +149,7 @@ p {
   line-height: 1;
 }
 
-.chat-title p,
+.room-name,
 .chat-status {
   color: #5a746b;
   font-size: 0.92rem;

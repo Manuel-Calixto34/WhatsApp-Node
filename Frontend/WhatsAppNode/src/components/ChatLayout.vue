@@ -89,7 +89,7 @@ onMounted(() => {
     const chatGeneral = chats.value.find((chat) => chat.id === "general");
 
     if(chatGeneral){
-        chatGeneral.value.push({
+        chatGeneral.mensajes.push({
           tipo: 'sistema',
           texto: `${nombre} ha entrado en el canal`,
         });
@@ -104,6 +104,14 @@ onMounted(() => {
       usuarioEscribiendo.value = '';
     }, 3000);
   });
+
+  socket.on('mensajeSistema',(mensaje) => {
+    const chat = chats.value.find((chat) => chat.id === mensaje.chatId);
+
+    if(chat){
+      chat.mensajes.push(mensaje)
+    }
+  })
 });
 
 onUnmounted(() => {
@@ -111,6 +119,7 @@ onUnmounted(() => {
   socket.off('mensaje');
   socket.off('nombreUsuario');
   socket.off('escribiendo');
+  socket.off('mensajeSistema')
   clearTimeout(escribiendoTimeout);
   socket.disconnect();
 });

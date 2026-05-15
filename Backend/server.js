@@ -37,10 +37,18 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     count--;
+    const usuarioDesconectado = usuarios.find((usuario) => usuario.id === socket.id);
     usuarios = usuarios.filter((usuario) => usuario.id !== socket.id)
     console.log('user disconnected');
     io.emit('numeroUsuarios', count);
     io.emit('usuariosConectados',usuarios)
+    if(usuarioDesconectado){
+      socket.broadcast.emit('mensajeSistema', {
+        chatId: 'general',
+        tipo: 'sistema',
+        texto: usuarioDesconectado.nombreUsuario + ' ha salido del chat',
+      });
+    }
   });
 
   socket.on('mensajeTexto', (datos) => {
