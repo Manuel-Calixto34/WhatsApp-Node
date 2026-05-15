@@ -1,17 +1,32 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { io } from 'socket.io-client';
-import { useRoute } from 'vue-router';
 import router from '@/router';
 import Sidebar from './Sidebar.vue';
 import ChatRoom from './ChatRoom.vue';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
-const route = useRoute();
-const usuario = route.query.usuario || 'Anonimo';
-const estado = route.query.estado || '';
-const avatar = route.query.avatar || '/avatars/avatar1.png';
+function obtenerPerfilChat() {
+  const perfilGuardado = sessionStorage.getItem('perfilChat');
+
+  if (perfilGuardado) {
+    return JSON.parse(perfilGuardado);
+  }
+
+  const user = auth.currentUser;
+
+  return {
+    usuario: user?.displayName || user?.email || 'Anonimo',
+    estado: user ? 'Conectado' : '',
+    avatar: user?.photoURL || '/avatars/usuario.jpg',
+  };
+}
+
+const perfilChat = obtenerPerfilChat();
+const usuario = perfilChat.usuario || 'Anonimo';
+const estado = perfilChat.estado || '';
+const avatar = perfilChat.avatar || '/avatars/usuario.jpg';
 
 const socketServerUrl = import.meta.env.VITE_SOCKET_SERVER_URL || (
   import.meta.env.DEV
@@ -31,19 +46,19 @@ const chats = ref([
   {
     id: 'general',
     nombre: 'Chat común',
-    tipo: 'comun',
+    tipo: 'común',
     mensajes: [],
   },
   {
     id: 'juegos',
     nombre: 'Chat de juegos',
-    tipo: 'privado',
+    tipo: 'juego',
     mensajes: [],
   },
   {
     id: 'debate',
     nombre: 'Chat de debate',
-    tipo: 'grupo',
+    tipo: 'conversación',
     mensajes: [],
   }
 ])
@@ -71,10 +86,14 @@ onMounted(() => {
   });
 
   socket.on('nombreUsuario', (nombre) => {
-    mensajes.value.push({
-      tipo: 'sistema',
-      texto: `${nombre} ha entrado en el canal`,
-    });
+    const chatGeneral = chats.value.find((chat) => chat.id === "general");
+
+    if(chatGeneral){
+        chatGeneral.value.push({
+          tipo: 'sistema',
+          texto: `${nombre} ha entrado en el canal`,
+        });
+    }
   });
 
   socket.on('escribiendo', (nombre) => {
@@ -124,8 +143,10 @@ function avisarEscribiendo() {
 
 async function cerrarSesion() {
   await signOut(auth);
+  sessionStorage.removeItem('perfilChat');
   router.push('/');
 }
+
 </script>
 
 <template>

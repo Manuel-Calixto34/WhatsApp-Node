@@ -28,6 +28,7 @@ app.get('/health', (req, res) => {
 });
 
 let count = 0;
+let usuarios = [];
 
 io.on('connection', (socket) => {
   count++;
@@ -36,8 +37,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     count--;
+    usuarios = usuarios.filter((usuario) => usuario.id !== socket.id)
     console.log('user disconnected');
     io.emit('numeroUsuarios', count);
+    io.emit('usuariosConectados',usuarios)
   });
 
   socket.on('mensajeTexto', (datos) => {
@@ -47,9 +50,30 @@ io.on('connection', (socket) => {
 
   socket.on('nombreUsuario', (nombre) => {
     console.log(nombre.nombreUsuario + ' ha entrado en el canal');
-    socket.nombreUsuario = nombre;
+    socket.nombreUsuario = nombre.nombreUsuario;
+
+    const usuario = {
+      id: socket.id,
+      nombreUsuario: nombre.nombreUsuario,
+      avatar: nombre.avatar || '/avatars/gatocorbata.jpg',
+      estado: nombre.estado || 'Disponible',
+    }
+
+    usuarios.push(usuario);
     socket.broadcast.emit('nombreUsuario', nombre.nombreUsuario);
+    io.emit('usuariosConectados',usuarios);
   });
+
+  socket.on('mensajePrivado',(mensaje) => {
+    const mensajePrivado = {
+      ...mensaje,
+      privado: true,
+      de: socket.id,
+    };
+
+    socket.to(mensaje.para).emit('mensajePrivado', mensajePrivado);
+    socket.emit('mensajePrivado',mensajePrivado)
+  })
 
   socket.on('escribiendo', (nombre) => {
     socket.broadcast.emit('escribiendo', nombre);

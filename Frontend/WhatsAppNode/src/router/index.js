@@ -34,7 +34,9 @@ function getCurrentUser() {
 router.beforeEach(async (to) => {
   const user = await getCurrentUser();
 
-  if (to.path === '/chat' && !user) {
+  const tieneLoginManual = sessionStorage.getItem('perfilChat');
+
+  if (to.path === '/chat' && !user && !tieneLoginManual) {
     return '/';
   }
 

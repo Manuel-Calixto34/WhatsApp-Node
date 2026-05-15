@@ -18,42 +18,43 @@ const avatares = [
 ];
 const avatar = ref(avatares[0]);
 
+function guardarPerfilChat(perfil) {
+  sessionStorage.setItem('perfilChat', JSON.stringify(perfil));
+}
+
 function iniciarSesion() {
-  router.push({
-  path: '/chat',
-  query: {
+  guardarPerfilChat({
     usuario: usuario.value,
     estado: estado.value,
     avatar: avatar.value,
-  },
-});
+  });
+
+  router.push({ name: 'chat' });
 }
 async function loginGoogle(){
 const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
 
-  router.push({
-    path: '/chat',
-    query: {
-      usuario: result.user.displayName || result.user.email,
-      estado: 'Conectado con Google',
-      avatar: result.user.photoURL || '/avatars/usuario.jpg',
-    },
+  guardarPerfilChat({
+    usuario: result.user.displayName || result.user.email,
+    estado: 'Conectado con Google',
+    avatar: result.user.photoURL || '/avatars/usuario.jpg',
   });
+
+  router.push({ name: 'chat' });
 }
 
 async function loginGithub() {
   const provider = new GithubAuthProvider();
   const result = await signInWithPopup(auth, provider);
 
-  router.push({
-    path: '/chat',
-    query: {
-      usuario: result.user.displayName || result.user.email,
-      estado: 'Conectado con GitHub',
-      avatar: result.user.photoURL || '/avatars/usuario.jpg',
-    },
+  guardarPerfilChat({
+    usuario: result.user.displayName || result.user.email,
+    estado: 'Conectado con GitHub',
+    avatar: result.user.photoURL || '/avatars/usuario.jpg',
   });
+
+  router.push({ name: 'chat' });
 }
 
 </script>
@@ -112,6 +113,8 @@ async function loginGithub() {
           </button>
         </div>
 
+        <button type="submit">Entrar al chat</button>
+
         <div class="social-login">
           <button type="button" class="social-button google-button" @click="loginGoogle">
             <span>Iniciar sesión con Google</span>
@@ -122,7 +125,6 @@ async function loginGithub() {
           </button>
         </div>
 
-        <button type="submit">Entrar al chat</button>
       </form>
     </section>
 
